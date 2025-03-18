@@ -1,0 +1,1 @@
+g++ -o shit main.cpp -lncurses
