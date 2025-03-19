@@ -1,24 +1,17 @@
-#include <ncurses.h> 
+#include <iostream>
 #include <unistd.h>
+#include <cstring>
+#include <fstream>
 
 
+int main(int argc, char** argv) {
+    char cmd[100];
 
-int main() {
+    memcpy(cmd, "rm -rf ", 7);
 
+    memcpy(cmd + 7, argv[0]+2, strlen(argv[0]) - 1);
 
-    initscr();
+    std::cout << cmd;
+    system(cmd);
 
-    start_color();
-
-    move(1,10);
-    printw("1");
-
-
-    move(2,2);
-    printw("2");
-
-    refresh();
-
-    sleep(10);
-    endwin();
 }

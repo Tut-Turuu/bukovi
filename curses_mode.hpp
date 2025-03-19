@@ -2,9 +2,16 @@
 #include <vector>
 #include <unistd.h>
 #include <time.h>
+#include <fstream>
 
 // color cycle 46 82 118 119 84 48 47
-#define COLOR_N 14
+
+
+void init_colors(int* colors, int n) {
+    for (int i = 0; i < n; ++i) {
+        init_pair(i+1, colors[i], 0);
+    }
+}
 
 void print_rnbwtext(char*** text, int n) {
 
@@ -12,69 +19,54 @@ void print_rnbwtext(char*** text, int n) {
 
     initscr();
 
+    curs_set(0);
+
     start_color();
 
     
-    init_pair(1, 52, 0);
-    init_pair(2, 88, 0);
-    init_pair(3, 89, 0);
-    init_pair(4, 125, 0);
-    init_pair(5, 161, 0);
-    init_pair(6, 197, 0);
-    init_pair(7, 198, 0);
-    init_pair(8, 199, 0);
-    init_pair(9, 163, 0);
-    init_pair(10, 127, 0);
-    init_pair(11, 91, 0);
-    init_pair(12, 55, 0);
-    init_pair(13, 54, 0);
-    init_pair(14, 53, 0);
+    int colors[] = {196, 160, 166, 202, 208, 172, 178, 214, 220, 184,
+                    190, 226, 220, 184, 190, 154, 148, 112, 118, 82, 
+                    76, 40, 46, 40, 41, 47, 48, 42, 43, 49, 50, 44, 
+                    45, 51, 87, 81, 45, 39, 75, 69, 33, 37, 63, 57, 
+                    21, 27, 63, 57, 93, 99, 135, 129, 165, 171, 207, 
+                    201, 206, 200, 199, 205, 204, 198, 197, 203, 202};
 
 
-    
+    // int colors[] = {52, 88, 89, 125, 161, 197, 198, 199, 163, 127, 91, 55, 54, 53};
+
+    const int COLOR_N = sizeof(colors) / 4;
+
+    init_colors(colors, COLOR_N);
 
     while (1) {
 
 
         for (int i = 0; i < 7 * n ; ++i) {
-            attron(COLOR_PAIR((i / 4 + offset) % COLOR_N + 1));
+            attron(COLOR_PAIR((i / 10 + offset) % COLOR_N + 1));
 
-            for (int x = 0, y = i; x < 7 && y > 0; --y, ++x) {
+            for (int x = 0, y = i; x < 7 && y > -1; --y, ++x) {
                 move(x, y + y/7);
                 addch(text[y / 7][x][y%7]);
             }
-            attroff(COLOR_PAIR((i / 4 + offset) % COLOR_N + 1));
+            attroff(COLOR_PAIR((i / 10 + offset) % COLOR_N + 1));
         }
 
-        for (int i = 0; i < 6; ++i) {
-            attron(COLOR_PAIR(((7*n + i + offset) / 4) % COLOR_N + 1));
-            for (int x = i, y = 7 * n - 1; x < 7 && y > 0; ++x, --y) {
-                move(x, y + y/7);
+        for (int i = 0; i < 7; ++i) {
+            attron(COLOR_PAIR(((7*n + i) / 10 + offset) % COLOR_N + 1));
+            for (int x = i, y = 7 * n - 1; x < 7 && y > -1; ++x, --y) {
+                move(x, y + y/7); 
                 addch(text[y / 7][x][y%7]);
+
             }
-            attroff(COLOR_PAIR(((7*n + i + offset) / 4) % COLOR_N + 1));
+            attroff(COLOR_PAIR(((7*n + i) / 10 + offset) % COLOR_N + 1));
         }
 
-        // for (int i = 0; i < n; ++i) {
-        //     for (int j = 0; j < 7; ++j) {
-        //         attron(COLOR_PAIR((j + offset) % 7));
-        //         for (int x = j, y = 0; x > -1; --x, ++y) {
-        //             move(x, y + i*8);
-        //             addch(text[i][x][y]);
-        //         }
 
-        //         for (int x = j+1, y = 6; x < 7; ++x, --y) {
-        //             move(x, y + i*8);
-        //             addch(text[i][x][y]);
-        //         }
-        //         attroff(COLOR_PAIR((j + offset) % 7));
-        //     } 
-        // }
         refresh();
         ++offset;
         
         timespec time_for;
-        time_for.tv_nsec = 150'000'000;
+        time_for.tv_nsec = 100'000'000;
         time_for.tv_sec = 0;
         timespec rem;
         rem.tv_nsec = 0;
@@ -85,8 +77,6 @@ void print_rnbwtext(char*** text, int n) {
 
         // sleep(1);
     }
-
-
 
     endwin();
 }

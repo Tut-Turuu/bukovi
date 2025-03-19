@@ -5,7 +5,7 @@
 #include "curses_mode.hpp"
 
 #define BACK_COLOR 0
-#define TEXT_COLOR 207
+
 
 // abcdefghijklmnopqrstuvwxyz
 
@@ -17,25 +17,26 @@ void read_font(const char* file, char*** alphabet) {
     char trash;
     
     for (int i = 0; i < 7; ++i) {
-        for (int j = 0; j < 26; ++j) {
+        for (int j = 0; j < 27; ++j) {
             
             fin.read(alphabet[j][i], 7);
             
         }
         fin.read(&trash, 1);
     }
+    fin.close();
 }
 
-void print_char(char*** alphabet, int i) {
+void print_char(char** const * text, int i) {
 
     for (int j = 0; j < 7; ++j) {
-        std::cout.write(alphabet[i][j], 7);
+        std::cout.write(text[i][j], 7);
         std::cout << '\n';    
     }
 
 }
 
-void look(char*** alphabet) {
+void look(char** const * alphabet) {
     int i;
     while (1) {
         std::cin >> i;
@@ -43,7 +44,7 @@ void look(char*** alphabet) {
     }
 }
 
-void cpy_char(char** dst, char** src) {
+void cpy_char(char** dst, char* const * src) {
     for (int i = 0; i < 7; ++i) {
         memcpy(dst[i], src[i], 7);
     }
@@ -59,27 +60,44 @@ void print_text(char*** text, int n) {
     }
 }
 
-void add_to_text(char*** text, char*** alphabet, int i, int& place) {
+void add_to_text(char*** text, char** const * alphabet, int i, int& place) {
     cpy_char(text[place], alphabet[i]);
     ++place;
 }
 
-int main() {
+int char_to_index(const char c) {
+    if (c == ' ') return 26;
+    return c - 'a';
+}
 
-    int n = 7;
+void create_text(char***& text, char** const * alphabet, const char* str, int& n) {
+    n = strlen(str);
+    text = new char**[n];
 
-    char*** alphabet = new char**[26];
-
-    char*** text = new char**[n];
-
-    for (int i = 0; i < 7*n; ++i) {
+    for (int i = 0; i < n; ++i) {
         text[i] = new char*[7];
         for (int j = 0; j < 7; ++j) {
             text[i][j] = new char[7];
         }
     }
+    for (int i = 0; i < n; ++i) {
+        cpy_char(text[i], alphabet[char_to_index(str[i])]);
+    }
+}
 
-    for (int i = 0; i < 26; ++i) {
+int main(int argc, char** argv) {
+
+    if (argc != 2) {
+        return -1;
+    }
+
+    int n;
+
+    char*** text;
+
+    char*** alphabet = new char**[27];
+
+    for (int i = 0; i < 27; ++i) {
         alphabet[i] = new char*[7];
         for (int j = 0; j < 7; ++j) {
             alphabet[i][j] = new char[7];
@@ -87,50 +105,14 @@ int main() {
     }
 
 
-    read_font("./fonts/ascii.txt", alphabet);
-    // look(alphabet);
-    
-    int place = 0;
-
-    add_to_text(text, alphabet, 5, place);
-    add_to_text(text, alphabet, 20, place);
-    add_to_text(text, alphabet, 2, place);
-    add_to_text(text, alphabet, 10, place);
-    add_to_text(text, alphabet, 8, place);
-    add_to_text(text, alphabet, 13, place);
-    add_to_text(text, alphabet, 6, place);
+    read_font("./ascii.txt", alphabet);
 
 
+    create_text(text, alphabet, argv[1], n);
 
 
     print_rnbwtext(text, n);
 
-    // char*** 
 
-
-    // char letter[7][8];
-    // for (int i = 0; i < 7; ++i) {
-    //     letter[i][8] = 0;
-    // }
-    
-    // initscr();
-
-
-    // move(10, 5); 
-    // start_color();
-
-
-
-    // for (int i = 0; i <= 256; ++i) {
-    //     init_pair(i , i, BACK_COLOR);
-    //     attron(COLOR_PAIR(i));
-    //     printw(".");
-    //     attroff(COLOR_PAIR(i));
-    // }
-    // refresh();
-
-
-    // getch();
-    // endwin();
     return 0;
 }
